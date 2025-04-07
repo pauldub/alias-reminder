@@ -430,8 +430,26 @@ def suggest_aliases(alias_file: Path, history_file: Path):
 
     print("Suggested Aliases:")
     for cmd, count in suggested_commands.items():
-        # Sanitize the command for use as an alias (remove spaces, etc.)
-        alias_name = cmd.replace(' ', '_').replace('-', '_')[:32] # Max 32 for alias name.
+        # Generate shorter, more concise alias names
+        words = cmd.split()
+        if len(words) > 1:
+            # Create an alias using first letters of each word
+            alias_name = ''.join(word[0] for word in words)
+            # For commands with common prefixes like git/bundle/docker, use more letters from the second part
+            if words[0] in ['git', 'bundle', 'docker', 'gh', 'be']:
+                # Use first word + first letter(s) of remaining words
+                alias_name = words[0] + ''.join(word[0] for word in words[1:])
+                # For very common patterns, make them even shorter
+                if words[0] == 'git':
+                    alias_name = 'g' + ''.join(word[0] for word in words[1:])
+                elif words[0] == 'bundle' and words[1] == 'exec':
+                    alias_name = 'be' + (''.join(word[0] for word in words[2:]) if len(words) > 2 else '')
+        else:
+            # For single-word commands, truncate to a reasonable length
+            alias_name = cmd[:8]
+            
+        # Ensure alias name is valid and not too long
+        alias_name = alias_name.replace('-', '').replace(':', '')[:12]  # Max 12 chars for brevity
         print(f"  alias {alias_name}='{cmd}'  # Count: {count}")
     print("Consider adding these to your .zshrc file.")
 
