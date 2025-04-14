@@ -86,7 +86,7 @@ _alias_reminder_preexec() {
   fi
 
   # Extract the first part of the command (simple heuristic)
-  local simple_cmd="${cmd%% \|*}" # Use \| instead of | because | is special in patterns
+  local simple_cmd="${command%% \|*}" # Use \| instead of | because | is special in patterns
   simple_cmd="${simple_cmd%% >*}"
   simple_cmd="${simple_cmd%% <*}"
   simple_cmd="${simple_cmd%% >>*}"
@@ -102,7 +102,7 @@ _alias_reminder_preexec() {
 
   # Don't run if the command is empty or internal/fast
   if [[ -z "$simple_cmd" ]] || [[ "$simple_cmd" = "fg" ]] || [[ "$simple_cmd" = "bg" ]]; then
-    _alias_reminder_log "Command is empty or internal (fg/bg), skipping."
+    _alias_reminder_log "Command is empty or internal (fg/bg), skipping. simple_cmd=$simple_cmd"
     return
   fi
 
@@ -112,13 +112,12 @@ _alias_reminder_preexec() {
     --alias-file "$ALIAS_REMINDER_ALIAS_FILE" \
     --cache-dir "$ALIAS_REMINDER_CACHE_DIR" \
     --stats-file "$ALIAS_REMINDER_STATS_FILE" \
+    check "$simple_cmd" \
     --cooldown "$ALIAS_REMINDER_COOLDOWN" \
     --min-length "$ALIAS_REMINDER_MIN_LENGTH" \
     --color "$ALIAS_REMINDER_COLOR" \
     --bold "$ALIAS_REMINDER_BOLD" \
-    --stats "$ALIAS_REMINDER_STATS" \
-    --debug "$ALIAS_REMINDER_DEBUG" \
-    check "$simple_cmd" # Pass the command to check as an argument
+    --stats "$ALIAS_REMINDER_STATS" 
 }
 
 # --- Plugin Commands ---
